@@ -1,6 +1,8 @@
 import React, {Fragment, useState} from 'react';
+import shortid from 'shortid';
+import PropTypes from 'prop-types'
 
-const Formulario = () => {
+const Formulario = ({crearCita}) => {
 
     //Crear State de Citas
     const [cita, actualizarCita] = useState({
@@ -10,6 +12,9 @@ const Formulario = () => {
         hora: '',
         sintomas: ''
     });
+
+    //Crear state error validacion form
+    const [error, actualizarError] = useState(false);
 
     //Funcion que se ejecuta cada que el usuario escribe un input
     const actualizarState = (e) => {
@@ -22,11 +27,42 @@ const Formulario = () => {
     //Extraer los valores
     const {mascota, propietario, fecha, hora, sintomas} = cita
 
+    //Cuando el usuario presiona gregar cita
+    const submitCita = (e) => {
+        e.preventDefault();
+
+        //Validar
+        if (mascota.trim() === '' || propietario.trim() === '' || fecha.trim() === '' || hora.trim() === '' || sintomas.trim() === '') {
+            actualizarError(true);
+            return;
+        }
+
+        //Eliminar el mensaje previo
+        actualizarError(false);
+
+        //Asignar un ID
+        cita.id = shortid();
+
+        //Crear la cita
+        crearCita(cita);
+
+        //Reiniciar el form
+        actualizarCita({
+            mascota: '',
+            propietario: '',
+            fecha: '',
+            hora: '',
+            sintomas: ''
+        })
+
+    }
+
 
     return (
         <Fragment>
             <h2>Crear Cita</h2>
-            <form>
+            {error ? <p className='alerta-error'>Todos los campos son obligatorios</p> : null}
+            <form onSubmit={submitCita}>
                 <label>Nombre Mascota</label>
                 <input
                     type="text"
@@ -79,5 +115,10 @@ const Formulario = () => {
         </Fragment>
     );
 };
+
+Formulario.propTypes = {
+    crearCita: PropTypes.func.isRequired
+
+}
 
 export default Formulario;
